@@ -1,0 +1,302 @@
+$def with (ccsr, csvfile)
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<html>
+<head>
+
+<style>
+#search {
+    width: 20em;  height: 2em;
+}
+#telemetry
+{
+font-family:"Trebuchet MS", Arial, Helvetica, sans-serif;
+width:100%;
+border-collapse:collapse;
+}
+#telemetry td, #telemetry th 
+{
+font-size:1.0em;
+border:1px solid #98bf21;
+padding:3px 7px 2px 7px;
+}
+#telemetry th 
+{
+font-size:1.1em;
+text-align:left;
+padding-top:5px;
+padding-bottom:4px;
+background-color:#A7C942;
+color:#fff;
+}
+#telemetry tr.even td 
+{
+color:#000;
+background-color:#EAF2D3;
+}
+</style>
+
+
+
+<title>CCSR Web Interface</title>
+</head>
+<body>
+<hr>
+
+<form name="main" method="post"> 
+  <table style="width:100%" bgcolor="#5B9BD5">
+     <tr>
+        <td><a href="http://letsmakerobots.com/robot/project/CCSR"><img src="images/title.png" alt="ccsr" style="width:344px;height:65px"></a></td>
+        <td><input type="submit" id="search"/></td>
+        <td>Refresh Telemetry<input type="checkbox" id="chkbxRefreshDump_" value="" $ccsr.localData['chkbxRefreshDump'] name="chkbxRefreshDump"/></td>
+        <td><img src="images/ccsr7.jpg" alt="ccsr" style="width:90px;height:70px"></td>
+     </tr>
+  </table>
+  <hr>
+  <table>
+    <tr>
+       <td>Command</td>
+    	 <td>Mission</td>
+       <td>State</td>
+       <td></td>
+		</tr>
+    <tr>
+       <td><input type="text" id="command" name="command"></input></td>
+    	 <td><select id="mission" name="mission">
+           <option selected="selected" value="none">none</option>
+           <option value="diagnostics">diagnostics</option>
+           <option value="findTargetByColor">findTargetByColor</option>
+           </select>
+       </td>
+    	 <td><select id="state" name="state">
+           <option 
+$if ccsr.localData['state'] == "SM_REMOTE_CONTROLLED": 
+   selected
+value="SM_REMOTE_CONTROLLED">SM_REMOTE_CONTROLLED</option>
+           <option 
+$if ccsr.localData['state'] == "SM_ORIENTATION": 
+   selected
+value="SM_ORIENTATION">SM_ORIENTATION</option>
+           <option 
+$if ccsr.localData['state'] == "SM_EXPLORE": 
+   selected
+value="SM_EXPLORE">SM_EXPLORE</option>
+           </select>
+       </td>
+       <td><input type="checkbox" id="chkbxDebug_" value="" name="chkbxDebug"/>debug</td>
+		</tr>
+  </table>
+
+
+  <hr>
+  <table>
+   <tr>
+   <td><h3>Locomotion</h3></td>
+   <td><h3>Actions</h3></td>
+   <td><h3>Settings</h3></td>
+   </tr>
+     <tr>
+     <td>
+        <table>
+           <tr>
+           <td></td>
+           <td><a href="http://localhost:8080/?id=motion_arrowUp"><img src="images/arrowUp.jpg" alt="arrowUp" style="width:80px;height:80px"></a></td>
+           <td></td>
+           </tr>
+           <tr>
+           <td rowspan="3"><a href="http://localhost:8080/?id=motion_arrowLeft"><img src="images/arrowLeft.jpg" alt="arrowUp" style="width:80px;height:80px"></a></td>
+           <td align="center">heading</td>
+           <td rowspan="3"><a href="http://localhost:8080/?id=motion_arrowRight"><img src="images/arrowRight.jpg" alt="arrowUp" style="width:80px;height:80px"></a></td>
+           </tr>
+           <tr>
+           <td align="center"><input type="text" id="heading" name="heading" value=$ccsr.localData['heading'] size='3'/></td>
+           </tr>
+           <tr>
+           <td><a href="http://localhost:8080/?id=motion_stop"><img src="images/stop.png" alt="arrowUp" style="width:85px;height:32px"></a></td>
+           </tr>
+           <tr>
+           <td></td>
+           <td><a href="http://localhost:8080/?id=motion_arrowDown"><img src="images/arrowDown.jpg" alt="arrowUp" style="width:80px;height:80px"></a></td>
+           <td></td>
+           </tr>
+        </table>
+  	 </td>
+     <td>
+        <table>
+           <tr>
+           <td><a href="http://localhost:8080/?id=action_analyzeObject"><img src="images/analyzeObject.png" alt="arrowUp" style="width:80px;height:30px"></a></td>
+           <td><a href="http://localhost:8080/?id=action_findObject"><img src="images/findObject.png" alt="" style="width:80px;height:30px"></a></td>
+           <td><a href="http://localhost:8080/?id=action_giveObject"><img src="images/giveObject.png" alt="" style="width:80px;height:30px"></a></td>
+           </tr>
+           <tr>
+           <td><a href="http://localhost:8080/?id=action_dropObject"><img src="images/dropObject.png" alt="" style="width:80px;height:30px"></a></td>
+           <td><a href="http://localhost:8080/?id=action_pickupObject"><img src="images/pickupObject.png" alt="" style="width:80px;height:30px"></a></td>
+           <td><a href="http://localhost:8080/?id="><img src="images/blankButton.png" alt="" style="width:80px;height:30px"></a></td>
+           </tr>
+           <tr>
+           <td><a href="http://localhost:8080/?id=action_orientationFwd"><img src="images/orientationFwd.png" alt="" style="width:80px;height:30px"></a></td>
+           <td><a href="http://localhost:8080/?id=action_orientationFull"><img src="images/orientationFull.png" alt="" style="width:80px;height:30px"></a></td>
+           <td><a href="http://localhost:8080/?id="><img src="images/blankButton.png" alt="" style="width:80px;height:30px"></a></td>
+           </tr>
+           <tr>
+           <td><a href="http://localhost:8080/?id="><img src="images/blankButton.png" alt="" style="width:80px;height:30px"></a></td>
+           <td><a href="http://localhost:8080/?id="><img src="images/blankButton.png" alt="" style="width:80px;height:30px"></a></td>
+           <td><a href="http://localhost:8080/?id="><img src="images/blankButton.png" alt="" style="width:80px;height:30px"></a></td>
+           </tr>
+           <tr>
+           <td><a href="http://localhost:8080/?id="><img src="images/blankButton.png" alt="" style="width:80px;height:30px"></a></td>
+           <td><a href="http://localhost:8080/?id="><img src="images/blankButton.png" alt="" style="width:80px;height:30px"></a></td>
+           <td><a href="http://localhost:8080/?id="><img src="images/blankButton.png" alt="" style="width:80px;height:30px"></a></td>
+           </tr>
+           <tr>
+           <td><a href="http://localhost:8080/?id="><img src="images/blankButton.png" alt="" style="width:80px;height:30px"></a></td>
+           <td><a href="http://localhost:8080/?id="><img src="images/blankButton.png" alt="" style="width:80px;height:30px"></a></td>
+           <td><a href="http://localhost:8080/?id="><img src="images/blankButton.png" alt="" style="width:80px;height:30px"></a></td>
+           </tr>
+           <tr>
+           <td><a href="http://localhost:8080/?id="><img src="images/blankButton.png" alt="" style="width:80px;height:30px"></a></td>
+           <td><a href="http://localhost:8080/?id="><img src="images/blankButton.png" alt="" style="width:80px;height:30px"></a></td>
+           <td><a href="http://localhost:8080/?id="><img src="images/blankButton.png" alt="" style="width:80px;height:30px"></a></td>
+           </tr>
+        </table>
+  	 </td>
+     <td>
+        <table>
+           <tr>
+           <td><input type="checkbox" id="chkbxListen_" value="" $ccsr.localData['chkbxListen'] name="chkbxListen"/>Listen</td>
+           <td><input type="checkbox" id="chkbxProximity_" value="" $ccsr.localData['chkbxProximity'] name="chkbxProximity"/>Proximity</td>
+           <td><input type="checkbox" id="chkbxSonarSonar_" value="" $ccsr.localData['chkbxSonar'] name="chkbxSonar"/>Sonar</td>
+           </tr>
+           <tr>
+           <td><input type="checkbox" id="chkbxTracking_" value="" $ccsr.localData['chkbxTracking'] name="chkbxTracking"/>Tracking</td>
+           <td><input type="checkbox" id="" value="" name=""/></td>
+           <td><input type="checkbox" id="" value="" name=""/></td>
+           </tr>
+           <tr>
+           <td><input type="checkbox" id="chkbxNavigation_" value="" $ccsr.localData['chkbxNavigation'] name="chkbxNavigation"/>Navigation</td>
+           <td><input type="checkbox" id="" value="" name=""/></td>
+           <td><input type="checkbox" id="" value="" name=""/></td>
+           </tr>
+           <tr>
+           <td><input type="checkbox" id="" value="" name=""/></td>
+           <td><input type="checkbox" id="" value="" name=""/></td>
+           <td><input type="checkbox" id="" value="" name=""/></td>
+           </tr>
+           <tr>
+           <td><input type="checkbox" id="" value="" name=""/></td>
+           <td><input type="checkbox" id="" value="" name=""/></td>
+           <td><input type="checkbox" id="" value="" name=""/></td>
+           </tr>
+           <tr>
+           <td><input type="checkbox" id="" value="" name=""/></td>
+           <td><input type="checkbox" id="" value="" name=""/></td>
+           <td><input type="checkbox" id="" value="" name=""/></td>
+           </tr>
+           <tr>
+           <td><input type="checkbox" id="" value="" name=""/></td>
+           <td><input type="checkbox" id="" value="" name=""/></td>
+           <td><input type="checkbox" id="" value="" name=""/></td>
+           </tr>
+        </table>
+  	 </td>
+     </tr>
+  </table>
+
+
+
+
+  <hr>
+  <table>
+    <tr>
+       <td bgcolor="#C6E2FF">
+          <table>
+            <tr>
+               <td><b><font size="4" color="blue">4 DOF Robotic Arm</font></b></td>
+               <td><input type="checkbox" id="chkbxArmDisable_" value="" $ccsr.localData['chkbxArmDisable'] name="chkbxArmDisable"/>  disable</td>
+            </tr>
+          </table>
+          <table>
+            <tr>
+               <td><input type="text" id="arm_shoulder" name="arm_shoulder" value=$ccsr.localData['arm_shoulder'] size='3'/></td>
+               <td><input type="text" id="arm_elbow" name="arm_elbow" value=$ccsr.localData['arm_elbow'] size='3'/></td>
+               <td><input type="text" id="arm_wrist" name="arm_wrist" value=$ccsr.localData['arm_wrist'] size='3'/></td>
+               <td><input type="text" id="arm_hand" name="arm_hand" value=$ccsr.localData['arm_hand'] size='3'/></td>
+               <td><input type="text" id="arm_speed" name="arm_speed" value=$ccsr.localData['arm_speed'] size='3'/></td>
+          </tr>
+            <tr>
+               <td>Shoulder</td>
+               <td>Elbow</td>
+               <td>Wrist</td>
+               <td>Hand</td>
+               <td>speed</td>
+          </tr>
+          </table>
+			 </td>
+       <td bgcolor="#C6E2FF">
+          <table>
+            <tr>
+               <td><b><font size="4" color="blue">Head Pan & Tilt</font></b></td>
+               <td><input type="checkbox" id="chkbxPantiltDisable_" value="" $ccsr.localData['chkbxPantiltDisable'] name="chkbxPantiltDisable"/>  disable</td>
+            </tr>
+          </table>
+          <table>
+            <tr>
+               <td><input type="text" id="pantilt_pan" name="pantilt_pan" value=$ccsr.localData['pantilt_pan'] size='3'/></td>
+               <td><input type="text" id="pantilt_tilt" name="pantilt_tilt" value=$ccsr.localData['pantilt_tilt'] size='3'/></td>
+               <td><input type="text" id="pantilt_speed" name="pantilt_speed" value=$ccsr.localData['pantilt_speed'] size='3'/></td>
+           </tr>
+            <tr>
+               <td>Pan</td>
+               <td>Tilt</td>
+               <td>speed</td>
+            </tr>
+          </table>
+			 </td>
+		</tr>
+  </table>
+
+<hr>
+<h3>Camera views</h3>
+<table>
+   <tr>
+   <td><img src="images/ccsr_camera_cap_raw.jpg" alt="Camera View Raw" style="width:304px;height:228px"></td>
+   <td><img src="images/ccsr_camera_cap_proc.jpg" alt="Camera View Processed" style="width:304px;height:228px"></td>
+   </tr>
+</table>
+<hr>
+<h3>Navigation and Sensors</h3>
+<table>
+   <tr>
+   <td>Sonar Profile</td>
+   <td>Map</td>
+   </tr>
+   <tr>
+   <td><img src="images/sonarProfile.png" alt="Sonar Profile" style="width:304px;height:228px"></td>
+   <td><img src="images/ccsr_camera_cap_proc.jpg" alt="Camera View Processed" style="width:304px;height:228px"></td>
+   </tr>
+</table>
+
+</form>
+
+<hr>
+
+<h1>Telemetry</h1>
+<table id="telemetry">
+  <tr style="background-color: green;">
+    <th>Property</th>
+    <th>Value</th> 
+    <th>Unit</th>
+  </tr>
+
+$for item in csvfile:
+    <tr class="$loop.parity">
+        <td>$item[0]</td>
+        <td>$item[1]</td>
+        <td>$item[2]</td>
+    </tr>
+</table>
+
+</body>
+</html>
+
+
