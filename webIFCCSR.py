@@ -1,5 +1,5 @@
 # CCSR web interface
-# python webIFCCSR.py
+# Usage: python webIFCCSR.py
 # access through localhost:8080
 
 import re
@@ -65,6 +65,10 @@ class CCSRTelemetry:
                         "SM_ORIENTATION": "2",
                         "SM_EXPLORE": "7"}
       self.csvNameMap =  {"compass": "heading",
+                          "proximity": "chkbxProximity",
+                          "TrackObject": "chkbxTracking",
+                          "navigationOn": "chkbxNavigation",
+                          "sonarSensorsOn": "chkbxSonar",
                           "temperature": "temperature"}
       self.csvfile = {}
       self.telemetryDump = []
@@ -85,9 +89,16 @@ class CCSRTelemetry:
    def updateLocalData(self):
       for item in ccsr.telemetryDump :
          if item[0] in self.csvNameMap:
-            if self.csvNameMap[item[0]] in self.localData:
-               self.localData[self.csvNameMap[item[0]]] = item[1]
-
+            el = self.csvNameMap[item[0]]
+            if el in self.localData:
+               if self.isCheckbox(el):
+                  if item[1] == '1':
+                     self.localData[el] = 'checked'
+                  else:
+                     self.localData[el] = ''
+               else:
+                  self.localData[el] = item[1]
+               
    # Return True if 'name' is an HTML checkbox
    def isCheckbox(self, name):
       return re.match('chkbx.+', name)
@@ -157,7 +168,7 @@ class CCSRTelemetry:
       elif cmdType == 'heading':
          self.response('turnto ' + self.localData['heading'])
       elif cmdTypeRaw == 'motion_arrowUp':
-         self.response('set state 7')
+         self.response('move 3')
       elif cmdTypeRaw == 'motion_arrowDown':
          self.response('move 2 1000000')
       elif cmdTypeRaw == 'motion_arrowRight':
@@ -165,7 +176,7 @@ class CCSRTelemetry:
       elif cmdTypeRaw == 'motion_arrowLeft':
          self.response('turn 2 -90')
       elif cmdTypeRaw == 'motion_stop':
-         self.response('set rc 1')
+         self.response('move 0')
       elif cmdTypeRaw == 'action_analyzeObject':
          self.response('obj analyze')
       elif cmdTypeRaw == 'action_findObject':
@@ -214,11 +225,12 @@ class index:
 
    def GET(self):
       ccsr.importTelemetry()  
+      ccsr.updateLocalData()
       user_data = web.input()  # Get parameters passed through html link
       form = myform()          # prepare HTML form
       for el in user_data:
         ccsr.createCommand(user_data[el])  # Create CCSR commands from web input
-      return render.webIFCCSR(ccsr, ccsr.csvfile)
+      return render.webIFCCSR(ccsr, ccsr.telemetryDump)
 
    def POST(self): 
       cmdQueue = []
