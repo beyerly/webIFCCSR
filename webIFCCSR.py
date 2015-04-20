@@ -1,5 +1,5 @@
 # CCSR web interface
-# python webIFCCSR.py
+# Usage: python webIFCCSR.py
 # access through localhost:8080
 
 import re
@@ -65,6 +65,10 @@ class CCSRTelemetry:
                         "SM_ORIENTATION": "2",
                         "SM_EXPLORE": "7"}
       self.csvNameMap =  {"compass": "heading",
+                          "proximity": "chkbxProximity",
+                          "TrackObject": "chkbxTracking",
+                          "navigationOn": "chkbxNavigation",
+                          "sonarSensorsOn": "chkbxSonar",
                           "temperature": "temperature"}
       self.csvfile = {}
       self.telemetryDump = []
@@ -84,10 +88,16 @@ class CCSRTelemetry:
    # Sync local data with CSV dump from CCSR
    def updateLocalData(self):
       for item in ccsr.telemetryDump :
-         if len(item) > 0:
-	    if item[0] in self.csvNameMap:
-               if self.csvNameMap[item[0]] in self.localData:
-                  self.localData[self.csvNameMap[item[0]]] = item[1]
+         if item[0] in self.csvNameMap:
+            el = self.csvNameMap[item[0]]
+            if el in self.localData:
+               if self.isCheckbox(el):
+                  if item[1] == '1':
+                     self.localData[el] = 'checked'
+                  else:
+                     self.localData[el] = ''
+               else:
+                  self.localData[el] = item[1]
 
    # Return True if 'name' is an HTML checkbox
    def isCheckbox(self, name):
@@ -215,6 +225,7 @@ class index:
 
    def GET(self):
       ccsr.importTelemetry()  
+      ccsr.updateLocalData()
       user_data = web.input()  # Get parameters passed through html link
       form = myform()          # prepare HTML form
       for el in user_data:
