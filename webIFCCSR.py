@@ -7,13 +7,13 @@ import csv
 import web
 import os
 from web import form
-import numpy
-import matplotlib
-from matplotlib import pyplot as plt
+#import numpy
+#import matplotlib
+#from matplotlib import pyplot as plt
 
 
-ccsrStateDumpFile      = '../data/ccsrState_dump_full.csv'
-ccsrProfileDumpFile    = '../data/profile_dump.csv'
+ccsrStateDumpFile      = '../../data/ccsrState_dump_full.csv'
+ccsrProfileDumpFile    = '../../data/profile_dump.csv'
 ccsrStateDumpFileDebug = 'ccsrState_dump.csv'
 
 render = web.template.render('templates/')
@@ -98,7 +98,7 @@ class CCSRTelemetry:
                      self.localData[el] = ''
                else:
                   self.localData[el] = item[1]
-               
+
    # Return True if 'name' is an HTML checkbox
    def isCheckbox(self, name):
       return re.match('chkbx.+', name)
@@ -234,7 +234,6 @@ class index:
 
    def POST(self): 
       cmdQueue = []
-      ccsr.importTelemetry()
       form = myform() 
       formdata = web.input()
       # Find out if any HTML form data has changed by comparing to localdata
@@ -271,18 +270,19 @@ class index:
       # import this telemetry and re-generate any pictures/graphs
       if 'chkbxRefreshDump' in formdata:
          ccsr.createCommand('chkbxRefreshDump') 
+         ccsr.importTelemetry()
          ccsr.updateLocalData()
-         data=numpy.loadtxt(ccsrProfileDumpFile,skiprows=1,delimiter=',')
-         y=data[:,1]
-         x=data[:,0]
-         plt.plot(x,y)
-         plt.savefig('images/sonarProfile.png',dpi=100)
+#         data=numpy.loadtxt(ccsrProfileDumpFile,skiprows=1,delimiter=',')
+#         y=data[:,1]
+#         x=data[:,0]
+#         plt.plot(x,y)
+#         plt.savefig('images/sonarProfile.png',dpi=100)
       if not form.validates(): 
          return render.webIFCCSR(ccsr, ccsr.telemetryDump)
       else:
          return render.webIFCCSR(ccsr, ccsr.telemetryDump)
 
-useFifos = False     # Only set True if integrated with CCSR robot platform
+useFifos = True     # Only set True if integrated with CCSR robot platform
 ccsr = CCSRTelemetry(useFifos);
 
 if __name__ == "__main__":
