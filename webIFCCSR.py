@@ -7,13 +7,13 @@ import csv
 import web
 import os
 from web import form
-import numpy
-import matplotlib
-from matplotlib import pyplot as plt
+#import numpy
+#import matplotlib
+#from matplotlib import pyplot as plt
 
 
-ccsrStateDumpFile      = '../data/ccsrState_dump_full.csv'
-ccsrProfileDumpFile    = '../data/profile_dump.csv'
+ccsrStateDumpFile      = '../../data/ccsrState_dump_full.csv'
+ccsrProfileDumpFile    = '../../data/profile_dump.csv'
 ccsrStateDumpFileDebug = 'ccsrState_dump.csv'
 
 render = web.template.render('templates/')
@@ -84,9 +84,10 @@ class CCSRTelemetry:
    # Sync local data with CSV dump from CCSR
    def updateLocalData(self):
       for item in ccsr.telemetryDump :
-         if item[0] in self.csvNameMap:
-            if self.csvNameMap[item[0]] in self.localData:
-               self.localData[self.csvNameMap[item[0]]] = item[1]
+         if len(item) > 0:
+	    if item[0] in self.csvNameMap:
+               if self.csvNameMap[item[0]] in self.localData:
+                  self.localData[self.csvNameMap[item[0]]] = item[1]
 
    # Return True if 'name' is an HTML checkbox
    def isCheckbox(self, name):
@@ -157,7 +158,7 @@ class CCSRTelemetry:
       elif cmdType == 'heading':
          self.response('turnto ' + self.localData['heading'])
       elif cmdTypeRaw == 'motion_arrowUp':
-         self.response('set state 7')
+         self.response('move 3')
       elif cmdTypeRaw == 'motion_arrowDown':
          self.response('move 2 1000000')
       elif cmdTypeRaw == 'motion_arrowRight':
@@ -165,7 +166,7 @@ class CCSRTelemetry:
       elif cmdTypeRaw == 'motion_arrowLeft':
          self.response('turn 2 -90')
       elif cmdTypeRaw == 'motion_stop':
-         self.response('set rc 1')
+         self.response('move 0')
       elif cmdTypeRaw == 'action_analyzeObject':
          self.response('obj analyze')
       elif cmdTypeRaw == 'action_findObject':
@@ -218,11 +219,10 @@ class index:
       form = myform()          # prepare HTML form
       for el in user_data:
         ccsr.createCommand(user_data[el])  # Create CCSR commands from web input
-      return render.webIFCCSR(ccsr, ccsr.csvfile)
+      return render.webIFCCSR(ccsr, ccsr.telemetryDump)
 
    def POST(self): 
       cmdQueue = []
-      ccsr.importTelemetry()
       form = myform() 
       formdata = web.input()
       # Find out if any HTML form data has changed by comparing to localdata
@@ -259,18 +259,19 @@ class index:
       # import this telemetry and re-generate any pictures/graphs
       if 'chkbxRefreshDump' in formdata:
          ccsr.createCommand('chkbxRefreshDump') 
+         ccsr.importTelemetry()
          ccsr.updateLocalData()
-         data=numpy.loadtxt(ccsrProfileDumpFile,skiprows=1,delimiter=',')
-         y=data[:,1]
-         x=data[:,0]
-         plt.plot(x,y)
-         plt.savefig('images/sonarProfile.png',dpi=100)
+#         data=numpy.loadtxt(ccsrProfileDumpFile,skiprows=1,delimiter=',')
+#         y=data[:,1]
+#         x=data[:,0]
+#         plt.plot(x,y)
+#         plt.savefig('images/sonarProfile.png',dpi=100)
       if not form.validates(): 
          return render.webIFCCSR(ccsr, ccsr.telemetryDump)
       else:
          return render.webIFCCSR(ccsr, ccsr.telemetryDump)
 
-useFifos = False     # Only set True if integrated with CCSR robot platform
+useFifos = True     # Only set True if integrated with CCSR robot platform
 ccsr = CCSRTelemetry(useFifos);
 
 if __name__ == "__main__":
