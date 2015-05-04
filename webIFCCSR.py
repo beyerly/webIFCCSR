@@ -30,6 +30,7 @@ myform = form.Form(
     form.Checkbox('chkbxProximity', value=''), 
     form.Checkbox('chkbxNavigation', value=''), 
     form.Checkbox('chkbxSonar', value=''), 
+    form.Checkbox('chkbxEvasiveAction', value=''), 
     form.Textbox('arm_shoulder', value='45'), 
     form.Textbox('arm_elbow', value='5'), 
     form.Textbox('arm_wrist', value='0'), 
@@ -72,7 +73,11 @@ class CCSRTelemetry:
                           "temperature": "temperature"}
       self.csvfile = {}
       self.telemetryDump = []
-
+      if self.useFifos:
+         self.ip_addr = '192.168.1.129'
+      else:
+         self.ip_addr = 'localhost'
+         
    # Read CSV dump file from CCSR
    def importTelemetry(self):
       if os.path.isfile(ccsrStateDumpFile): 
@@ -168,7 +173,10 @@ class CCSRTelemetry:
       elif cmdType == 'heading':
          self.response('turnto ' + self.localData['heading'])
       elif cmdTypeRaw == 'motion_arrowUp':
-         self.response('move 3')
+         if self.localData['chkbxEvasiveAction'] == 'checked':
+            self.response('move 4')
+         else:
+            self.response('move 3')
       elif cmdTypeRaw == 'motion_arrowDown':
          self.response('move 2 1000000')
       elif cmdTypeRaw == 'motion_arrowRight':
@@ -179,6 +187,8 @@ class CCSRTelemetry:
          self.response('move 0')
       elif cmdTypeRaw == 'action_analyzeObject':
          self.response('obj analyze')
+      elif cmdTypeRaw == 'action_calibrateCompass':
+         self.response('calcomp')
       elif cmdTypeRaw == 'action_findObject':
          self.response('obj find')
       elif cmdTypeRaw == 'action_giveObject':
@@ -212,7 +222,8 @@ class images:
             "png":"images/png",
             "jpg":"images/jpeg",
             "gif":"images/gif",
-            "ico":"images/x-icon"            }
+            "ico":"images/x-icon",
+            "svg":"image/svg+xml"}
 
         if name in os.listdir('images'):  # Security
             web.header("Content-Type", cType[ext]) # Set the Header
@@ -282,7 +293,7 @@ class index:
       else:
          return render.webIFCCSR(ccsr, ccsr.telemetryDump)
 
-useFifos = True     # Only set True if integrated with CCSR robot platform
+useFifos = False     # Only set True if integrated with CCSR robot platform
 ccsr = CCSRTelemetry(useFifos);
 
 if __name__ == "__main__":
