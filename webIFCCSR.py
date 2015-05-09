@@ -189,6 +189,8 @@ class CCSRTelemetry:
          self.response('obj analyze')
       elif cmdTypeRaw == 'action_calibrateCompass':
          self.response('calcomp')
+      elif cmdTypeRaw == 'action_triangulate':
+         self.response('triangulate')
       elif cmdTypeRaw == 'action_findObject':
          self.response('obj find')
       elif cmdTypeRaw == 'action_giveObject':
