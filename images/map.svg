@@ -36,7 +36,7 @@
    <text x="55" y="25" fill="blue" font-size="5">BCNb0</text>
    <rect id="bcn"  name="BCNg0" x="72" y="57" width="10" height="10" style="fill:rgb(0,255,0);stroke-width:0" />
    <text x="72" y="57" fill="green" font-size="5">BCNg0</text>
-   <rect id="tgt0" x="23" y="78" width="10" height="10" fill="yellow" stroke-width="0" />
+   <rect id="tgt" name="tgt0" x="23" y="78" width="10" height="10" fill="yellow" stroke-width="0" />
    <text x="23" y="78" fill="red" font-size="5">tgt0</text>
 
 <g id="obstacles">	 

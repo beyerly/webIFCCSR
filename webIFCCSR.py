@@ -36,6 +36,8 @@ myform = form.Form(
     form.Textbox('arm_wrist', value='0'), 
     form.Textbox('arm_hand', value='0'), 
     form.Textbox('arm_speed', value='50'), 
+    form.Textbox('loc_x', value='0'), 
+    form.Textbox('loc_y', value='0'), 
     form.Checkbox('chkbxArmDisable', value='checked'), 
     form.Textbox('pantilt_pan', value='0'), 
     form.Textbox('pantilt_tilt', value='0'), 
@@ -55,6 +57,13 @@ myform = form.Form(
 # Telemetry class. Keeps track of CCSR state
 class CCSRTelemetry:
    def __init__(self, useFifos):
+      self.mapgridX=30
+      self.mapgridY=30
+      self.mapWidth=300
+      self.mapHeight=300
+      self.mapRegionX=self.mapWidth/self.mapgridX
+      self.mapRegionY=self.mapHeight/self.mapgridY
+      
       if useFifos:
          self.wfifo = open('/home/root/ccsr/nlp_fifo_in', 'w')
          self.rfifo = open('/home/root/ccsr/nlp_fifo_out', 'r')
@@ -73,6 +82,7 @@ class CCSRTelemetry:
                           "temperature": "temperature"}
       self.csvfile = {}
       self.telemetryDump = []
+      self.responseQueue = []
       if self.useFifos:
          self.ip_addr = '192.168.1.129'
       else:
@@ -108,7 +118,7 @@ class CCSRTelemetry:
    def isCheckbox(self, name):
       return re.match('chkbx.+', name)
 
-   # Translate HTML form entry (by 'id') into an CCSR command
+   # Translate HTML form entry (by 'id') into an CCSR command and store in list
    def createCommand(self, el):
       # If HTML form entry is of format <prefix>_<command>, extract the
       # <prefix>. E.g. arm_shoulder, translates to set arm <all fields>
@@ -117,92 +127,95 @@ class CCSRTelemetry:
       if cmdType:
          cmdType = cmdType.group(0)
       if cmdType == 'command':
-         self.response(self.localData['command'])
+         self.responseQueue.append(self.localData['command'])
       elif cmdType == 'mission':
          # Missions not implemented yet
          print self.localData['mission']
       elif cmdType == 'state':
-         self.response('set state ' + self.stateMap[self.localData['state']])
+         self.responseQueue.append('set state ' + self.stateMap[self.localData['state']])
       elif cmdType == 'chkbxRefreshDump':
-         self.response('dump disk')
+         self.responseQueue.append('dump disk')
       elif cmdType == 'chkbxListen':
          if self.localData['chkbxListen'] == 'checked':
-            self.response('listen')
+            self.responseQueue.append('listen')
          else:
-            self.response('listen 0')
+            self.responseQueue.append('listen 0')
       elif cmdType == 'chkbxTracking':
          if self.localData['chkbxTracking'] == 'checked':
-            self.response('set track 1')
+            self.responseQueue.append('set track 1')
          else:
-            self.response('set track 0')
+            self.responseQueue.append('set track 0')
       elif cmdType == 'chkbxProximity':
          if self.localData['chkbxProximity'] == 'checked':
-            self.response('set prox 1')
+            self.responseQueue.append('set prox 1')
          else:
-            self.response('set prox 0')
+            self.responseQueue.append('set prox 0')
       elif cmdType == 'chkbxNavigation':
          if self.localData['chkbxNavigation'] == 'checked':
-            self.response('set nav 1')
+            self.responseQueue.append('set nav 1')
          else:
-            self.response('set nav 0')
+            self.responseQueue.append('set nav 0')
       elif cmdType == 'chkbxSonar':
          if self.localData['chkbxSonar'] == 'checked':
-            self.response('set sonar 1')
+            self.responseQueue.append('set sonar 1')
          else:
-            self.response('set sonar 0')
+            self.responseQueue.append('set sonar 0')
       elif cmdType == 'chkbxArmDisable':
          if self.localData['chkbxArmDisable'] == 'checked':
-            self.response('set arm 0')
+            self.responseQueue.append('set arm 0')
          else:
-            self.response('set arm 1')
+            self.responseQueue.append('set arm 1')
       elif cmdType == 'chkbxPantiltDisable':
          if self.localData['chkbxPantiltDisable'] == 'checked':
-            self.response('set pantilt 0')
+            self.responseQueue.append('set pantilt 0')
          else:
-            self.response('set pantilt 1')
+            self.responseQueue.append('set pantilt 1')
       elif cmdType == 'arm':
-         self.response('set arm ' + self.localData['arm_shoulder'] + ' ' 
+         self.responseQueue.append('set arm ' + self.localData['arm_shoulder'] + ' ' 
                                   + self.localData['arm_elbow'] + ' '
                                   + self.localData['arm_wrist'] + ' '
                                   + self.localData['arm_hand'] + ' '
                                   + self.localData['arm_speed'])
+      elif cmdType == 'loc':
+         self.responseQueue.append('goto ' + self.localData['loc_x'] + ' ' 
+                                  + self.localData['loc_y'])
       elif cmdType == 'pantilt':
-         self.response('set pantilt ' + self.localData['pantilt_pan'] + ' ' 
+         self.responseQueue.append('set pantilt ' + self.localData['pantilt_pan'] + ' ' 
                                       + self.localData['pantilt_tilt'] + ' '
                                       + self.localData['pantilt_speed'])
       elif cmdType == 'heading':
-         self.response('turnto ' + self.localData['heading'])
+         self.responseQueue.append('turnto ' + self.localData['heading'])
       elif cmdTypeRaw == 'motion_arrowUp':
          if self.localData['chkbxEvasiveAction'] == 'checked':
-            self.response('move 4')
+            self.responseQueue.append('move 4')
          else:
-            self.response('move 3')
+            self.responseQueue.append('move 3')
       elif cmdTypeRaw == 'motion_arrowDown':
-         self.response('move 2 1000000')
+         self.responseQueue.append('move 2 1000000')
       elif cmdTypeRaw == 'motion_arrowRight':
-         self.response('turn 2 90')
+         self.responseQueue.append('turn 2 90')
       elif cmdTypeRaw == 'motion_arrowLeft':
-         self.response('turn 2 -90')
+         self.responseQueue.append('turn 2 -90')
       elif cmdTypeRaw == 'motion_stop':
-         self.response('move 0')
+         self.responseQueue.append('move 0')
       elif cmdTypeRaw == 'action_analyzeObject':
-         self.response('obj analyze')
+         self.responseQueue.append('obj analyze')
       elif cmdTypeRaw == 'action_calibrateCompass':
-         self.response('calcomp')
+         self.responseQueue.append('calcomp')
       elif cmdTypeRaw == 'action_triangulate':
-         self.response('triangulate')
+         self.responseQueue.append('triangulate')
       elif cmdTypeRaw == 'action_findObject':
-         self.response('obj find')
+         self.responseQueue.append('obj find')
       elif cmdTypeRaw == 'action_giveObject':
-         self.response('obj give')
+         self.responseQueue.append('obj give')
       elif cmdTypeRaw == 'action_pickupObject':
-         self.response('obj pickup')
+         self.responseQueue.append('obj pickup')
       elif cmdTypeRaw == 'action_dropObject':
-         self.response('obj drop')
+         self.responseQueue.append('obj drop')
       elif cmdTypeRaw == 'action_orientationFull':
-         self.response('orient full')
+         self.responseQueue.append('orient full')
       elif cmdTypeRaw == 'action_orientationFwd':
-         self.response('orient fwd')
+         self.responseQueue.append('orient fwd')
       else:
          print 'unknown command'
 
@@ -215,6 +228,14 @@ class CCSRTelemetry:
          self.wfifo.flush()
          # This should block untill cmd response is received. Used to sync.
          self.cmdResponse = self.rfifo.readline();  
+
+   # send all accumulated commands to CCSR
+   def sendCommands(self):
+      # remove duplicates
+      r = list(set(self.responseQueue))
+      for el in r:
+         self.response(el)
+
 
 # Webpy image class, makes web images available
 class images:
@@ -238,15 +259,23 @@ class index:
 
    def GET(self):
       ccsr.importTelemetry()  
+      ccsr.responseQueue = []
       ccsr.updateLocalData()
       user_data = web.input()  # Get parameters passed through html link
       form = myform()          # prepare HTML form
       for el in user_data:
-        ccsr.createCommand(user_data[el])  # Create CCSR commands from web input
+        if (el=='locX'):
+           ccsr.localData['loc_x'] = user_data[el]
+        elif (el=='locY'):
+           ccsr.localData['loc_y'] = user_data[el]
+        elif(el=='id'):
+           ccsr.createCommand(user_data[el])  # Create CCSR commands from web input
+      ccsr.sendCommands()
       return render.webIFCCSR(ccsr, ccsr.telemetryDump)
 
    def POST(self): 
       cmdQueue = []
+      ccsr.responseQueue = []
       form = myform() 
       formdata = web.input()
       # Find out if any HTML form data has changed by comparing to localdata
@@ -290,6 +319,7 @@ class index:
 #         x=data[:,0]
 #         plt.plot(x,y)
 #         plt.savefig('images/sonarProfile.png',dpi=100)
+      ccsr.sendCommands()
       if not form.validates(): 
          return render.webIFCCSR(ccsr, ccsr.telemetryDump)
       else:

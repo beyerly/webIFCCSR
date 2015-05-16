@@ -36,7 +36,11 @@ background-color:#EAF2D3;
 }
 </style>
 
-
+<map name="locationmap">
+   $for x in range(0, ccsr.mapgridX):
+      $for y in range(0, ccsr.mapgridY):
+         <area shape="rect" coords="$(x*ccsr.mapRegionX),$(y*ccsr.mapRegionY),$((x+1)*ccsr.mapRegionX),$((y+1)*ccsr.mapRegionY)" alt="Sun" href="http://$(ccsr.ip_addr):8080/?locX=$x&locY=$y&id=loc">
+</map>
 
 <title>CCSR Web Interface</title>
 </head>
@@ -269,12 +273,29 @@ value="SM_EXPLORE">SM_EXPLORE</option>
    <tr>
    <td>Sonar Profile</td>
    <td>Map</td>
+   <td>location</td>
    </tr>
    <tr>
    <td><img src="images/ccsr_camera_cap_proc.jpg" alt="Sonar Profile" style="width:304px;height:228px"></td>
-   <td><img src="images/map.svg" style="width:304px;height:228px"></img></td>
+   <td><img src="images/map.svg" style="width:300px;height:300px" usemap="#locationmap"></img></td>
+   <td>
+      <table>
+        <tr>
+           <td><input type="text" id="loc_x" name="loc_x" value=$ccsr.localData['loc_x'] size='3'/></td>
+           <td><input type="text" id="loc_y" name="loc_y" value=$ccsr.localData['loc_y'] size='3'/></td>
+      </tr>
+        <tr>
+           <td>X</td>
+           <td>Y</td>
+      </tr>
+      </table>
+	 
+	 
+	 </td>
    </tr>
 </table>
+
+
 
 </form>
 
