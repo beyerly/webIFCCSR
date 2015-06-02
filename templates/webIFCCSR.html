@@ -63,6 +63,7 @@ background-color:#EAF2D3;
     	 <td>Mission</td>
        <td>State</td>
        <td></td>
+       <td>Tracking</td>
 		</tr>
     <tr>
        <td><input type="text" id="command" name="command"></input></td>
@@ -88,6 +89,17 @@ value="SM_EXPLORE">SM_EXPLORE</option>
            </select>
        </td>
        <td><input type="checkbox" id="chkbxDebug_" value="" name="chkbxDebug"/>debug</td>
+    	 <td><select id="objectRecogMode" name="objectRecogMode">
+           <option 
+$if ccsr.localData['objectRecogMode'] == "colorThreshhold": 
+   selected
+value="colorThreshhold">colorThreshhold</option>
+           <option 
+$if ccsr.localData['objectRecogMode'] == "shapeDetection": 
+   selected
+value="shapeDetection">shapeDetection</option>
+           </select>
+       </td>
 		</tr>
   </table>
 
@@ -174,7 +186,7 @@ value="SM_EXPLORE">SM_EXPLORE</option>
            <tr>
            <td><input type="checkbox" id="chkbxTracking_" value="" $ccsr.localData['chkbxTracking'] name="chkbxTracking"/>Tracking</td>
            <td><input type="checkbox" id="chkbxEvasiveAction_" value="" $ccsr.localData['chkbxEvasiveAction'] name="chkbxEvasiveAction"/>Evasive Action</td>
-           <td><input type="checkbox" id="" value="" name=""/></td>
+           <td><input type="checkbox" id="chkbxShowEmotion_" value="" $ccsr.localData['chkbxShowEmotion'] name="chkbxShowEmotion"/>Emotions</td>
            </tr>
            <tr>
            <td><input type="checkbox" id="chkbxNavigation_" value="" $ccsr.localData['chkbxNavigation'] name="chkbxNavigation"/>Navigation</td>
@@ -276,7 +288,7 @@ value="SM_EXPLORE">SM_EXPLORE</option>
    <td>location</td>
    </tr>
    <tr>
-   <td><img src="images/ccsr_camera_cap_proc.jpg" alt="Sonar Profile" style="width:304px;height:228px"></td>
+   <td><img src="images/sonarProfile.jpg" alt="Sonar Profile" style="width:304px;height:228px"></td>
    <td><img src="images/map.svg" style="width:300px;height:300px" usemap="#locationmap"></img></td>
    <td>
       <table>
