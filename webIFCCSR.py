@@ -31,6 +31,7 @@ myform = form.Form(
     form.Checkbox('chkbxNavigation', value=''), 
     form.Checkbox('chkbxSonar', value=''), 
     form.Checkbox('chkbxEvasiveAction', value=''), 
+    form.Checkbox('chkbxShowEmotion', value=''), 
     form.Textbox('arm_shoulder', value='45'), 
     form.Textbox('arm_elbow', value='5'), 
     form.Textbox('arm_wrist', value='0'), 
@@ -51,6 +52,8 @@ myform = form.Form(
     form.Dropdown('state', ['SM_REMOTE_CONTROLLED',
                             'SM_ORIENTATION',
                             'SM_EXPLORE'], value='SM_REMOTE_CONTROLLED'),
+    form.Dropdown('objectRecogMode', ['colorThreshhold',
+                            'shapeDetection'], value='colorThreshhold'),
     form.Dropdown('mission', ['diagnostics', 'findTargetByColor']))
 
 
@@ -142,7 +145,10 @@ class CCSRTelemetry:
             self.responseQueue.append('listen 0')
       elif cmdType == 'chkbxTracking':
          if self.localData['chkbxTracking'] == 'checked':
-            self.responseQueue.append('set track 1')
+            if self.localData['objectRecogMode'] == 'colorThreshhold':
+               self.responseQueue.append('set track 1')
+            elif self.localData['objectRecogMode'] == 'shapeDetection':
+               self.responseQueue.append('set track 2')
          else:
             self.responseQueue.append('set track 0')
       elif cmdType == 'chkbxProximity':
@@ -155,6 +161,11 @@ class CCSRTelemetry:
             self.responseQueue.append('set nav 1')
          else:
             self.responseQueue.append('set nav 0')
+      elif cmdType == 'chkbxShowEmotion':
+         if self.localData['chkbxShowEmotion'] == 'checked':
+            self.responseQueue.append('set mood 1')
+         else:
+            self.responseQueue.append('set mood 0')
       elif cmdType == 'chkbxSonar':
          if self.localData['chkbxSonar'] == 'checked':
             self.responseQueue.append('set sonar 1')
