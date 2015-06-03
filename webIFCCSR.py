@@ -31,7 +31,7 @@ myform = form.Form(
     form.Checkbox('chkbxNavigation', value=''), 
     form.Checkbox('chkbxSonar', value=''), 
     form.Checkbox('chkbxEvasiveAction', value=''), 
-    form.Checkbox('chkbxShowEmotion', value=''), 
+    form.Checkbox('chkbxShowEmotion', value='checked'), 
     form.Textbox('arm_shoulder', value='45'), 
     form.Textbox('arm_elbow', value='5'), 
     form.Textbox('arm_wrist', value='0'), 
@@ -182,18 +182,16 @@ class CCSRTelemetry:
          else:
             self.responseQueue.append('set pantilt 1')
       elif cmdType == 'arm':
-         self.responseQueue.append('set arm ' + self.localData['arm_shoulder'] + ' ' 
-                                  + self.localData['arm_elbow'] + ' '
-                                  + self.localData['arm_wrist'] + ' '
-                                  + self.localData['arm_hand'] + ' '
-                                  + self.localData['arm_speed'])
+         cmd = 'set arm ' + self.localData['arm_shoulder'] + ' ' + self.localData['arm_elbow'] + ' ' + self.localData['arm_wrist'] + ' ' + self.localData['arm_hand'] + ' ' + self.localData['arm_speed']
+         if cmd not in self.responseQueue:
+            self.responseQueue.append(cmd)
       elif cmdType == 'loc':
          self.responseQueue.append('goto ' + self.localData['loc_x'] + ' ' 
                                   + self.localData['loc_y'])
       elif cmdType == 'pantilt':
-         self.responseQueue.append('set pantilt ' + self.localData['pantilt_pan'] + ' ' 
-                                      + self.localData['pantilt_tilt'] + ' '
-                                      + self.localData['pantilt_speed'])
+         cmd = 'set pantilt ' + self.localData['pantilt_pan'] + ' ' + self.localData['pantilt_tilt'] + ' ' + self.localData['pantilt_speed']
+         if cmd not in self.responseQueue:
+            self.responseQueue.append(cmd)
       elif cmdType == 'heading':
          self.responseQueue.append('turnto ' + self.localData['heading'])
       elif cmdTypeRaw == 'motion_arrowUp':
@@ -244,7 +242,8 @@ class CCSRTelemetry:
    def sendCommands(self):
       # remove duplicates
       r = list(set(self.responseQueue))
-      for el in r:
+      print self.responseQueue
+      for el in self.responseQueue:
          self.response(el)
 
 
@@ -336,6 +335,7 @@ class index:
       else:
          return render.webIFCCSR(ccsr, ccsr.telemetryDump)
 
+#useFifos = False     # Only set True if integrated with CCSR robot platform
 useFifos = True     # Only set True if integrated with CCSR robot platform
 ccsr = CCSRTelemetry(useFifos);
 
