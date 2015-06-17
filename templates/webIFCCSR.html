@@ -91,13 +91,17 @@ value="SM_EXPLORE">SM_EXPLORE</option>
        <td><input type="checkbox" id="chkbxDebug_" value="" name="chkbxDebug"/>debug</td>
     	 <td><select id="objectRecogMode" name="objectRecogMode">
            <option 
-$if ccsr.localData['objectRecogMode'] == "colorThreshhold": 
+$if ccsr.localData['objectRecogMode'] == "colorThreshold": 
    selected
-value="colorThreshhold">colorThreshhold</option>
+value="colorThreshold">colorThreshold</option>
            <option 
 $if ccsr.localData['objectRecogMode'] == "shapeDetection": 
    selected
 value="shapeDetection">shapeDetection</option>
+           <option 
+$if ccsr.localData['objectRecogMode'] == "facialRecognition": 
+   selected
+value="facialRecognition">facialRecognition</option>
            </select>
        </td>
 		</tr>
@@ -107,9 +111,16 @@ value="shapeDetection">shapeDetection</option>
   <hr>
   <table>
    <tr>
-   <td><h3>Locomotion</h3></td>
-   <td><h3>Actions</h3></td>
-   <td><h3>Settings</h3></td>
+   <td>
+     <table>
+       <tr>
+         <td><b><font size="4" color="blue">Locomotion</font></b></td>
+      	 <td><input type="checkbox" id="chkbxMotorDisable_" value="" $ccsr.localData['chkbxMotorDisable'] name="chkbxMotorDisable"/>  disable</td>
+       </tr>
+     </table>	 
+	 </td>
+   <td><b><font size="4" color="blue">Actions</font></b></td>
+   <td><b><font size="4" color="blue">Settings</font></b></td>
    </tr>
      <tr>
      <td>
@@ -285,24 +296,12 @@ value="shapeDetection">shapeDetection</option>
    <tr>
    <td>Sonar Profile</td>
    <td>Map</td>
-   <td>location</td>
+   <td></td>
    </tr>
    <tr>
    <td><img src="images/sonarProfile.jpg" alt="Sonar Profile" style="width:304px;height:228px"></td>
    <td><img src="images/map_SLAM.svg"  style="width:300px;height:300px" usemap="#locationmap"></img></td>
    <td>
-      <table>
-        <tr>
-           <td><input type="text" id="loc_x" name="loc_x" value=$ccsr.localData['loc_x'] size='3'/></td>
-           <td><input type="text" id="loc_y" name="loc_y" value=$ccsr.localData['loc_y'] size='3'/></td>
-      </tr>
-        <tr>
-           <td>X</td>
-           <td>Y</td>
-      </tr>
-      </table>
-	 
-	 
 	 </td>
    </tr>
 </table>
@@ -310,6 +309,18 @@ value="shapeDetection">shapeDetection</option>
 
 
 </form>
+
+<hr>
+<table>
+   <tr>
+   <td><img src="images/gageTemplate.svg" style="width:150px;height:150px" </img></td>
+   <td><img  src="images/compass.svg" style="width:150px;height:150px" </img></td>
+   <td><img  src="images/gageTemplate.svg" style="width:150px;height:150px" </img></td>
+   <td><img  src="images/gageTemplate.svg" style="width:150px;height:150px" </img></td>
+   </tr>
+</table>
+
+
 
 <hr>
 
