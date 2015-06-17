@@ -78,7 +78,7 @@ class CCSRTelemetry:
                         "SM_ORIENTATION": "2",
                         "SM_EXPLORE": "7"}
       self.csvNameMap =  {"compass": "heading",
-                          "proximity": "chkbxProximity",
+                          "proximitySensorsOn": "chkbxProximity",
                           "TrackObject": "chkbxTracking",
                           "navigationOn": "chkbxNavigation",
                           "sonarSensorsOn": "chkbxSonar",
@@ -110,7 +110,7 @@ class CCSRTelemetry:
             el = self.csvNameMap[item[0]]
             if el in self.localData:
                if self.isCheckbox(el):
-                  if item[1] == '1':
+                  if re.match(' +1', item[1]):
                      self.localData[el] = 'checked'
                   else:
                      self.localData[el] = ''
@@ -237,6 +237,7 @@ class CCSRTelemetry:
          self.wfifo.flush()
          # This should block untill cmd response is received. Used to sync.
          self.cmdResponse = self.rfifo.readline();  
+	 print "resp " + self.cmdResponse
 
    # send all accumulated commands to CCSR
    def sendCommands(self):
@@ -268,9 +269,7 @@ class images:
 class index:
 
    def GET(self):
-      ccsr.importTelemetry()  
       ccsr.responseQueue = []
-      ccsr.updateLocalData()
       user_data = web.input()  # Get parameters passed through html link
       form = myform()          # prepare HTML form
       for el in user_data:
@@ -281,6 +280,8 @@ class index:
         elif(el=='id'):
            ccsr.createCommand(user_data[el])  # Create CCSR commands from web input
       ccsr.sendCommands()
+      ccsr.importTelemetry()  
+      ccsr.updateLocalData()
       return render.webIFCCSR(ccsr, ccsr.telemetryDump)
 
    def POST(self): 
@@ -322,14 +323,14 @@ class index:
       # import this telemetry and re-generate any pictures/graphs
       if 'chkbxRefreshDump' in formdata:
          ccsr.createCommand('chkbxRefreshDump') 
-         ccsr.importTelemetry()
-         ccsr.updateLocalData()
 #         data=numpy.loadtxt(ccsrProfileDumpFile,skiprows=1,delimiter=',')
 #         y=data[:,1]
 #         x=data[:,0]
 #         plt.plot(x,y)
 #         plt.savefig('images/sonarProfile.png',dpi=100)
       ccsr.sendCommands()
+      ccsr.importTelemetry()
+      ccsr.updateLocalData()
       if not form.validates(): 
          return render.webIFCCSR(ccsr, ccsr.telemetryDump)
       else:
