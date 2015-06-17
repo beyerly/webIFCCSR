@@ -15,7 +15,7 @@ from web import form
 ccsrStateDumpFile      = '../../data/ccsrState_dump_full.csv'
 ccsrProfileDumpFile    = '../../data/profile_dump.csv'
 ccsrStateDumpFileDebug = 'ccsrState_dump.csv'
-
+#
 render = web.template.render('templates/')
 
 urls = (
@@ -32,6 +32,7 @@ myform = form.Form(
     form.Checkbox('chkbxSonar', value=''), 
     form.Checkbox('chkbxEvasiveAction', value=''), 
     form.Checkbox('chkbxShowEmotion', value='checked'), 
+    form.Checkbox('chkbxMotorDisable', value='checked'), 
     form.Textbox('arm_shoulder', value='45'), 
     form.Textbox('arm_elbow', value='5'), 
     form.Textbox('arm_wrist', value='0'), 
@@ -52,8 +53,8 @@ myform = form.Form(
     form.Dropdown('state', ['SM_REMOTE_CONTROLLED',
                             'SM_ORIENTATION',
                             'SM_EXPLORE'], value='SM_REMOTE_CONTROLLED'),
-    form.Dropdown('objectRecogMode', ['colorThreshhold',
-                            'shapeDetection'], value='colorThreshhold'),
+    form.Dropdown('objectRecogMode', ['colorThreshold',
+                            'shapeDetection'], value='colorThreshold'),
     form.Dropdown('mission', ['diagnostics', 'findTargetByColor']))
 
 
@@ -77,6 +78,8 @@ class CCSRTelemetry:
       self.stateMap =  {"SM_REMOTE_CONTROLLED": "9",
                         "SM_ORIENTATION": "2",
                         "SM_EXPLORE": "7"}
+      self.objRecogModeMap =  {"colorThreshold": "0",
+                        "shapeDetection": "1"}
       self.csvNameMap =  {"compass": "heading",
                           "proximity": "chkbxProximity",
                           "TrackObject": "chkbxTracking",
@@ -136,6 +139,8 @@ class CCSRTelemetry:
          print self.localData['mission']
       elif cmdType == 'state':
          self.responseQueue.append('set state ' + self.stateMap[self.localData['state']])
+      elif cmdType == 'objectRecogMode':
+         self.responseQueue.append('set objrecogmode ' + self.objRecogModeMap[self.localData['objectRecogMode']])
       elif cmdType == 'chkbxRefreshDump':
          self.responseQueue.append('dump disk')
       elif cmdType == 'chkbxListen':
@@ -145,10 +150,7 @@ class CCSRTelemetry:
             self.responseQueue.append('listen 0')
       elif cmdType == 'chkbxTracking':
          if self.localData['chkbxTracking'] == 'checked':
-            if self.localData['objectRecogMode'] == 'colorThreshhold':
-               self.responseQueue.append('set track 1')
-            elif self.localData['objectRecogMode'] == 'shapeDetection':
-               self.responseQueue.append('set track 2')
+            self.responseQueue.append('set track 1')
          else:
             self.responseQueue.append('set track 0')
       elif cmdType == 'chkbxProximity':
@@ -176,6 +178,11 @@ class CCSRTelemetry:
             self.responseQueue.append('set arm 0')
          else:
             self.responseQueue.append('set arm 1')
+      elif cmdType == 'chkbxMotorDisable':
+         if self.localData['chkbxMotorDisable'] == 'checked':
+            self.responseQueue.append('set motor 0')
+         else:
+            self.responseQueue.append('set motor 1')
       elif cmdType == 'chkbxPantiltDisable':
          if self.localData['chkbxPantiltDisable'] == 'checked':
             self.responseQueue.append('set pantilt 0')
@@ -193,7 +200,8 @@ class CCSRTelemetry:
          if cmd not in self.responseQueue:
             self.responseQueue.append(cmd)
       elif cmdType == 'heading':
-         self.responseQueue.append('turnto ' + self.localData['heading'])
+         if self.localData['chkbxMotorDisable'] != 'checked':
+            self.responseQueue.append('turnto ' + self.localData['heading'])
       elif cmdTypeRaw == 'motion_arrowUp':
          if self.localData['chkbxEvasiveAction'] == 'checked':
             self.responseQueue.append('move 4')
@@ -335,8 +343,8 @@ class index:
       else:
          return render.webIFCCSR(ccsr, ccsr.telemetryDump)
 
-#useFifos = False     # Only set True if integrated with CCSR robot platform
-useFifos = True     # Only set True if integrated with CCSR robot platform
+useFifos = False     # Only set True if integrated with CCSR robot platform
+#useFifos = True     # Only set True if integrated with CCSR robot platform
 ccsr = CCSRTelemetry(useFifos);
 
 if __name__ == "__main__":
