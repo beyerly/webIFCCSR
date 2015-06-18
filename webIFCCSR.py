@@ -344,8 +344,8 @@ class index:
       else:
          return render.webIFCCSR(ccsr, ccsr.telemetryDump)
 
-useFifos = False     # Only set True if integrated with CCSR robot platform
-#useFifos = True     # Only set True if integrated with CCSR robot platform
+#useFifos = False     # Only set True if integrated with CCSR robot platform
+useFifos = True     # Only set True if integrated with CCSR robot platform
 ccsr = CCSRTelemetry(useFifos);
 
 if __name__ == "__main__":
